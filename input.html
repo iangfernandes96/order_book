@@ -1,0 +1,33 @@
+<body>
+    <form onsubmit="return openWebSocket()">
+        <label for="currencyPair">Currency Pair:</label>
+        <select id="currencyPair">
+            <option value="BTCUSD">BTCUSD</option>
+            <option value="ETHUSD">ETHUSD</option>
+            <!-- Add more options as needed -->
+        </select>
+        <br>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" step="0.01">
+        <br>
+        <input type="submit" value="Send">
+    </form>
+    <div id="result"></div>
+    <script>
+        function openWebSocket() {
+            var currencyPair = document.getElementById('currencyPair').value;
+            var quantity = document.getElementById('quantity').value;
+            var ws = new WebSocket(`ws://localhost:8000/ws/order-book`);
+            ws.onopen = function (event) {
+                ws.send(currencyPair);
+                ws.send(quantity);
+            };
+            ws.onmessage = function (event) {
+                document.getElementById('result').innerText = 'Received: \n' + event.data;
+            };
+            return false;  // Prevent form submission
+        }
+    </script>
+</body>
+
+</html>

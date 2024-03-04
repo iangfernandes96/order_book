@@ -1,0 +1,41 @@
+version: '3.4'
+services:
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+  # localstack:
+  #   container_name: "localstack"
+  #   image: localstack/localstack
+  #   ports:
+  #     - "127.0.0.1:4566:4566" # LocalStack Gateway
+  #     - "127.0.0.1:4510-4559:4510-4559" # external services port range
+  #   environment:
+  #     # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+  #     - DEBUG=${DEBUG:-0}
+  #     - AWS_ACCESS_KEY_ID=foobar
+  #     - AWS_DEFAULT_REGION=foobar
+  #     - AWS_SECRET_ACCESS_KEY=foobar
+  #   volumes:
+  #     - .:/app
+  # app:
+  #   container_name: order_book_app
+  #   build: .
+  #   command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload --log-level=debug
+  #   volumes:
+  #     - .:/app
+  #   ports:
+  #     - 8000:8000
+  #   restart: always
+  #   depends_on:
+  #     - redis
+  #     # - localstack
+  order_book_celery_worker:
+    container_name: order_book_celery_worker
+    build: .
+    command: celery -A tasks.orders.celery_worker worker --loglevel=debug -P solo --without-gossip -E
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
